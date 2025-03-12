@@ -1,0 +1,31 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    /* ... outras variáveis de cores ... */
+  }
+}
+
+.clock-container {
+  @apply flex flex-col items-center justify-center p-8 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 shadow-xl;
+}
+
+.clock-time {
+  @apply text-6xl font-bold text-white mb-2;
+}
+
+.clock-date {
+  @apply text-xl text-white/80;
+}
+
+.activity-list {
+  @apply mt-8 w-full max-w-md;
+}
+
+.activity-item {
+  @apply flex items-center gap-4 p-4 bg-white/10 backdrop-blur-sm rounded-lg mb-3 transition-all hover:bg-white/20;
+}
