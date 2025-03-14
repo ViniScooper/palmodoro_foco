@@ -30,3 +30,8 @@
 .activity-item {
   @apply flex items-center gap-4 p-4 bg-white/10 backdrop-blur-sm rounded-lg mb-3 transition-all hover:bg-white/20;
 }
+
+
+
+
+
