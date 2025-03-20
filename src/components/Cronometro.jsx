@@ -1,0 +1,255 @@
+// filepath: c:\Users\vini\Music\Palmodoro_foco\src\components\Cronometro.jsx
+import React, { useState, useEffect } from 'react';
+
+const Cronometro = () => {
+  const [viewMode, setViewMode] = useState('clock'); // Alterna entre 'clock' e 'timer'
+  const [currentTime, setCurrentTime] = useState(new Date()); // Relógio atual
+  const [timerInput, setTimerInput] = useState({ hours: 0, minutes: 0, seconds: 0 });
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [activities, setActivities] = useState([
+    { id: 1, title: 'Exercício matinal', completed: false },
+    { id: 2, title: 'Reunião de equipe', completed: false },
+    { id: 3, title: 'Estudar', completed: false },
+  ]);
+
+  // Atualiza o relógio atual a cada segundo
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  // Atualiza o temporizador quando está rodando
+  useEffect(() => {
+    let interval;
+    if (isTimerRunning && timeLeft > 0) {
+      interval = setInterval(() => {
+        setTimeLeft((prev) => prev - 1);
+      }, 1000);
+    } else if (timeLeft === 0 && isTimerRunning) {
+      setIsTimerRunning(false);
+      alert('Temporizador concluído!');
+    }
+    return () => clearInterval(interval);
+  }, [isTimerRunning, timeLeft]);
+
+  const startTimer = () => {
+    const totalSeconds =
+      timerInput.hours * 3600 + timerInput.minutes * 60 + timerInput.seconds;
+
+    if (totalSeconds > 0) {
+      setTimeLeft(totalSeconds);
+      setIsTimerRunning(true);
+    }
+  };
+
+  const resetTimer = () => {
+    setIsTimerRunning(false);
+    setTimeLeft(0);
+    setTimerInput({ hours: 0, minutes: 0, seconds: 0 });
+  };
+
+  const formatTime = (seconds) => {
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    return `${hrs.toString().padStart(2, '0')}:${mins
+      .toString()
+      .padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const addNewActivity = () => {
+    const title = prompt('Digite o nome da nova atividade:');
+    if (title) {
+      const newActivity = {
+        id: Date.now(),
+        title,
+        completed: false,
+      };
+      setActivities([...activities, newActivity]);
+    }
+  };
+
+  const toggleCompletion = (id) => {
+    setActivities((prevActivities) =>
+      prevActivities.map((activity) =>
+        activity.id === id
+          ? { ...activity, completed: !activity.completed }
+          : activity
+      )
+    );
+  };
+
+  const deleteActivity = (id) => {
+    setActivities((prevActivities) => prevActivities.filter((activity) => activity.id !== id));
+  };
+
+  return (
+    <div className="max-w-md mx-auto p-6 bg-white rounded-xl shadow-2xl min-h-screen flex flex-col text-black">
+      <h1 className="text-3xl font-bold text-center mb-4">Palmodoro</h1>
+
+      {/* Botões para alternar entre Relógio e Temporizador */}
+      <div className="flex justify-center gap-4 mb-6">
+        <button
+          onClick={() => setViewMode('clock')}
+          className={`px-4 py-2 rounded ${
+            viewMode === 'clock' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-black'
+          }`}
+        >
+          Relógio
+        </button>
+        <button
+          onClick={() => setViewMode('timer')}
+          className={`px-4 py-2 rounded ${
+            viewMode === 'timer' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-black'
+          }`}
+        >
+          Temporizador
+        </button>
+      </div>
+
+      {/* Exibição do Relógio */}
+      {viewMode === 'clock' && (
+        <div className="text-center">
+          <h2 className="text-4xl font-bold mb-2"> {/* Aumentado de text-2xl para text-4xl */}
+            {currentTime.toLocaleTimeString('pt-BR', {
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit',
+              hour12: true,
+            })}
+          </h2>
+          <div className="text-2xl text-gray-700"> {/* Aumentado de text-gray-700 para text-2xl */}
+            {currentTime.toLocaleDateString('pt-BR', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Exibição do Temporizador */}
+      {viewMode === 'timer' && (
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">Temporizador</h2>
+          <div className="text-5xl font-extrabold mb-4">{formatTime(timeLeft)}</div>
+
+          {!isTimerRunning && (
+            <div className="flex gap-2 justify-center mb-4">
+              <input
+                type="number"
+                min="0"
+                value={timerInput.hours}
+                onChange={(e) =>
+                  setTimerInput({
+                    ...timerInput,
+                    hours: parseInt(e.target.value) || 0,
+                  })
+                }
+                className="w-20 px-2 py-1 border rounded text-center"
+                placeholder="Horas"
+              />
+              <input
+                type="number"
+                min="0"
+                value={timerInput.minutes}
+                onChange={(e) =>
+                  setTimerInput({
+                    ...timerInput,
+                    minutes: parseInt(e.target.value) || 0,
+                  })
+                }
+                className="w-20 px-2 py-1 border rounded text-center"
+                placeholder="Minutos"
+              />
+              <input
+                type="number"
+                min="0"
+                value={timerInput.seconds}
+                onChange={(e) =>
+                  setTimerInput({
+                    ...timerInput,
+                    seconds: parseInt(e.target.value) || 0,
+                  })
+                }
+                className="w-20 px-2 py-1 border rounded text-center"
+                placeholder="Segundos"
+              />
+            </div>
+          )}
+
+          <div className="flex gap-2 justify-center">
+            {!isTimerRunning ? (
+              <button
+                onClick={startTimer}
+                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+              >
+                Iniciar
+              </button>
+            ) : (
+              <button
+                onClick={() => setIsTimerRunning(false)}
+                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+              >
+                Pausar
+              </button>
+            )}
+            <button
+              onClick={resetTimer}
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              Reiniciar
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Lista de Atividades */}
+      <div className="mt-6">
+        <h2 className="text-2xl font-bold mb-4">Atividades</h2>
+        <button
+          onClick={addNewActivity}
+          className="mb-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+        >
+          Adicionar Atividade
+        </button>
+        <ul className="space-y-2">
+          {activities.map((activity) => (
+            <li
+              key={activity.id}
+              className={`flex items-center justify-between p-4 rounded ${
+                activity.completed ? 'bg-green-200' : 'bg-gray-200'
+              }`}
+            >
+              <span
+                className={`flex-1 ${
+                  activity.completed ? 'line-through text-gray-500' : 'text-black'
+                }`}
+              >
+                {activity.title}
+              </span>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => toggleCompletion(activity.id)}
+                  className="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+                >
+                  {activity.completed ? 'Desfazer' : 'Concluir'}
+                </button>
+                <button
+                  onClick={() => deleteActivity(activity.id)}
+                  className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                >
+                  Excluir
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+};
+
+export default Cronometro;
