@@ -1,19 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from './components/ui/button';
 import { useToast } from './components/ui/use-toast';
 import { Toaster } from './components/ui/toaster';
-import { Plus, Check, Trash2 } from 'lucide-react';
+import { Plus, Trash2, Clock, Timer } from 'lucide-react';
 
 function App() {
+  const [viewMode, setViewMode] = useState('clock');
   const [time, setTime] = useState(new Date());
+  const [timerInput, setTimerInput] = useState({ hours: 0, minutes: 0, seconds: 0 });
+  const [timeLeft, setTimeLeft] = useState(0);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [activities, setActivities] = useState(() => {
     const saved = localStorage.getItem('activities');
-    return saved ? JSON.parse(saved) : [
-      { id: 1, title: "Exercício matinal", completed: false },
-      { id: 2, title: "Reunião de equipe", completed: false },
-      { id: 3, title: "Estudar", completed: false }
-    ];
+    return saved
+      ? JSON.parse(saved)
+      : [
+          { id: 1, title: 'Exercício matinal', completed: false },
+          { id: 2, title: 'Reunião de equipe', completed: false },
+          { id: 3, title: 'Estudar', completed: false },
+        ];
   });
   const { toast, toasts } = useToast();
 
@@ -23,72 +28,231 @@ function App() {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('activities', JSON.stringify(activities));
-  }, [activities]);
+    let interval;
+    if (isTimerRunning && timeLeft > 0) {
+      interval = setInterval(() => {
+        setTimeLeft((prev) => prev - 1);
+      }, 1000);
+    } else if (timeLeft === 0 && isTimerRunning) {
+      setIsTimerRunning(false);
+      toast({
+        title: 'Temporizador concluído!',
+        variant: 'default',
+      });
+    }
+    return () => clearInterval(interval);
+  }, [isTimerRunning, timeLeft]);
 
-  const toggleActivity = (id) => {
-    setActivities(activities.map(activity => 
-      activity.id === id 
-        ? { ...activity, completed: !activity.completed }
-        : activity
-    ));
+  const startTimer = () => {
+    const totalSeconds =
+      timerInput.hours * 3600 + timerInput.minutes * 60 + timerInput.seconds;
 
-    const activity = activities.find(a => a.id === id);
+    if (totalSeconds > 0) {
+      setTimeLeft(totalSeconds);
+      setIsTimerRunning(true);
+    }
+  };
+
+  const resetTimer = () => {
+    setIsTimerRunning(false);
+    setTimeLeft(0);
+    setTimerInput({ hours: 0, minutes: 0, seconds: 0 });
+  };
+
+  const formatTime = (seconds) => {
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    return `${hrs.toString().padStart(2, '0')}:${mins
+      .toString()
+      .padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const toggleCompletion = (id) => {
+    setActivities((prevActivities) =>
+      prevActivities.map((activity) =>
+        activity.id === id
+          ? { ...activity, completed: !activity.completed }
+          : activity
+      )
+    );
+
+    const activity = activities.find((a) => a.id === id);
     toast({
-      title: activity.completed ? "Atividade pendente" : "Atividade concluída",
+      title: activity.completed ? 'Atividade pendente' : 'Atividade concluída',
       description: activity.title,
     });
   };
 
   const deleteActivity = (id) => {
-    setActivities(activities.filter(activity => activity.id !== id));
+    setActivities(activities.filter((activity) => activity.id !== id));
     toast({
-      title: "Atividade removida",
-      variant: "destructive",
+      title: 'Atividade removida',
+      variant: 'destructive',
     });
   };
 
   const addNewActivity = () => {
-    const title = prompt("Digite o nome da nova atividade:");
+    const title = prompt('Digite o nome da nova atividade:');
     if (title) {
       const newActivity = {
         id: Date.now(),
         title,
-        completed: false
+        completed: false,
       };
       setActivities([...activities, newActivity]);
       toast({
-        title: "Nova atividade adicionada",
+        title: 'Nova atividade adicionada',
         description: title,
       });
     }
   };
 
   return (
-    <div className="clock-container">
-      <div className="clock-time">{time.toLocaleTimeString()}</div>
-      <div className="clock-date">{time.toLocaleDateString('pt-BR', { 
-        weekday: 'long', 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-      })}</div>
-      <div className="activity-list">
-        <Button onClick={addNewActivity}>
-          <Plus /> Adicionar
-        </Button>
-        {activities.map((activity) => (
-          <div key={activity.id} className="activity-item">
-            <Button onClick={() => toggleActivity(activity.id)}>
-              {activity.completed ? <Check /> : <Plus />}
-            </Button>
-            <span>{activity.title}</span>
-            <Button onClick={() => deleteActivity(activity.id)}>
-              <Trash2 />
-            </Button>
+    <div className="max-w-md mx-auto p-4 bg-white rounded-lg shadow-md min-h-screen flex flex-col">
+      {/* Header Section */}
+      <div className="flex-none">
+        <div className="view-switcher mb-4 flex justify-center gap-4">
+          <Button
+            variant={viewMode === 'clock' ? 'default' : 'outline'}
+            onClick={() => setViewMode('clock')}
+          >
+            <Clock className="mr-2 h-4 w-4" /> Relógio
+          </Button>
+          <Button
+            variant={viewMode === 'timer' ? 'default' : 'outline'}
+            onClick={() => setViewMode('timer')}
+          >
+            <Timer className="mr-2 h-4 w-4" /> Temporizador
+          </Button>
+        </div>
+
+        {viewMode === 'clock' ? (
+          <div className="mb-4">
+            <div className="text-4xl font-bold text-center mb-2">
+              {time.toLocaleTimeString('pt-BR', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true,
+              })}
+            </div>
+            <div className="text-center text-gray-600">
+              {time.toLocaleDateString('pt-BR', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
+            </div>
           </div>
-        ))}
+        ) : (
+          <div className="mb-4">
+            <div className="text-4xl font-bold text-center mb-4">
+              {formatTime(timeLeft)}
+            </div>
+
+            {!isTimerRunning && (
+              <div className="flex gap-2 justify-center mb-4">
+                <input
+                  type="number"
+                  min="0"
+                  value={timerInput.hours}
+                  onChange={(e) =>
+                    setTimerInput({
+                      ...timerInput,
+                      hours: parseInt(e.target.value) || 0,
+                    })
+                  }
+                  className="w-20 px-2 py-1 border rounded text-center"
+                  placeholder="Horas"
+                />
+                <input
+                  type="number"
+                  min="0"
+                  value={timerInput.minutes}
+                  onChange={(e) =>
+                    setTimerInput({
+                      ...timerInput,
+                      minutes: parseInt(e.target.value) || 0,
+                    })
+                  }
+                  className="w-20 px-2 py-1 border rounded text-center"
+                  placeholder="Minutos"
+                />
+                <input
+                  type="number"
+                  min="0"
+                  value={timerInput.seconds}
+                  onChange={(e) =>
+                    setTimerInput({
+                      ...timerInput,
+                      seconds: parseInt(e.target.value) || 0,
+                    })
+                  }
+                  className="w-20 px-2 py-1 border rounded text-center"
+                  placeholder="Segundos"
+                />
+              </div>
+            )}
+
+            <div className="flex gap-2 justify-center">
+              {!isTimerRunning ? (
+                <Button onClick={startTimer} disabled={timeLeft > 0}>
+                  Iniciar
+                </Button>
+              ) : (
+                <Button onClick={() => setIsTimerRunning(false)}>Pausar</Button>
+              )}
+              <Button variant="secondary" onClick={resetTimer}>
+                Reiniciar
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Activities Section with Scroll */}
+      <div className="flex-1 overflow-y-auto mt-4">
+        <Button
+          className="w-full mb-4 bg-green-500 hover:bg-green-600"
+          onClick={addNewActivity}
+        >
+          <Plus className="mr-2 h-4 w-4" />
+          Adicionar
+        </Button>
+
+        <div className="space-y-2">
+          {activities.map((activity) => (
+            <div
+              key={activity.id}
+              className="flex items-center gap-4 bg-gray-100 p-2 rounded-md"
+            >
+              <input
+                type="checkbox"
+                checked={activity.completed}
+                onChange={() => toggleCompletion(activity.id)}
+                className="w-6 h-6 rounded border-gray-300 text-green-500 focus:ring-green-500 focus:ring-2"
+              />
+              <span
+                className={`flex-1 ${
+                  activity.completed ? 'line-through text-gray-500' : ''
+                }`}
+              >
+                {activity.title}
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => deleteActivity(activity.id)}
+              >
+                <Trash2 className="text-red-500 hover:text-red-700" />
+              </Button>
+            </div>
+          ))}
+        </div>
+      </div>
+
       <Toaster toasts={toasts} />
     </div>
   );
