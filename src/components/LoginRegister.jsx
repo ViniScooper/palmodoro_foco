@@ -12,22 +12,32 @@ const LoginRegister = ({ onLogin }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    
+
     const url = isLogin ? 'http://192.168.1.10:5000/login' : 'http://192.168.1.10:5000/register';
 
     try {
       const response = await axios.post(url, formData);
+      console.log('Resposta do backend:', response.data); // Log da resposta do backend
       alert(response.data.message);
 
       if (isLogin) {
+        // Salva o userId no localStorage
+        if (response.data.userId) {
+          localStorage.setItem('userId', response.data.userId); // Certifique-se de que o backend retorna userId
+        } else {
+          console.error('userId não retornado pelo backend');
+        }
+
         // Salva o token no localStorage (opcional)
-        localStorage.setItem('token', response.data.token);
+        if (response.data.token) {
+          localStorage.setItem('token', response.data.token);
+        }
 
         // Chama a função onLogin para redirecionar
         onLogin();
       }
     } catch (error) {
+      console.error('Erro na requisição:', error.response?.data || error.message);
       alert(error.response?.data?.message || 'Erro ao processar a solicitação');
     }
   };

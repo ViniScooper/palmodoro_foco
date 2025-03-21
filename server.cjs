@@ -44,20 +44,34 @@ app.post('/register', async (req, res) => {
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
 
-  const query = 'SELECT * FROM users WHERE email = ?';
-  db.query(query, [email], async (err, results) => {
-    if (err) return res.status(500).send(err);
-    if (results.length === 0) return res.status(404).send({ message: 'User not found' });
-
-    const user = results[0];
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-
-    if (!isPasswordValid) {
-      return res.status(401).send({ message: 'Invalid credentials' });
+  const userQuery = 'SELECT id, email, password FROM users WHERE email = ?';
+  db.query(userQuery, [email], async (err, results) => {
+    if (err) {
+      console.error('Erro ao buscar usuário:', err);
+      return res.status(500).json({ message: 'Erro interno do servidor' });
     }
 
+    if (results.length === 0) {
+      return res.status(401).json({ message: 'Credenciais inválidas' });
+    }
+
+    const user = results[0];
+
+    // Verifica a senha usando bcrypt
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: 'Credenciais inválidas' });
+    }
+
+    // Gera o token JWT
     const token = jwt.sign({ id: user.id }, SECRET_KEY, { expiresIn: '1h' });
-    res.status(200).send({ message: 'Login successful', token });
+
+    // Retorna o userId e o token
+    res.json({
+      message: 'Login realizado com sucesso',
+      userId: user.id, // Inclua o userId na resposta
+      token,
+    });
   });
 });
 
