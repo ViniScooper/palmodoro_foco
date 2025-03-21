@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const Cronometro = () => {
+const Cronometro = ({ onViewUserData }) => {
   const [viewMode, setViewMode] = useState('clock'); // Alterna entre 'clock' e 'timer'
   const [currentTime, setCurrentTime] = useState(new Date()); // Relógio atual
   const [timerInput, setTimerInput] = useState({ hours: 0, minutes: 0, seconds: 0 });
@@ -99,10 +99,11 @@ const Cronometro = () => {
   return (
     <div className="max-w-md mx-auto p-6 bg-white rounded-xl shadow-2xl min-h-screen flex flex-col text-black">
       <h1 className="text-3xl font-bold text-center mb-4">Palmodoro</h1>
+    
 
-      {/* Botão para acessar dados do usuário */}
+      {/* Botão para acessar os dados do usuário */}
       <button
-        onClick={handleViewUserData}
+        onClick={onViewUserData}
         className="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
       >
         Ver Dados do Usuário

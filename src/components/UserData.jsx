@@ -15,7 +15,7 @@ const UserData = ({ onBack }) => {
         setUserData(response.data.user);
         setCompletedActivities(response.data.completedActivities);
       } catch (error) {
-        console.error('Error:', error); // Log do erro
+        console.error('Erro ao carregar os dados do usuário:', error);
         alert('Erro ao carregar os dados do usuário');
       }
     };
@@ -49,7 +49,7 @@ const UserData = ({ onBack }) => {
               type="text"
               value={userData.name}
               onChange={(e) => setUserData({ ...userData, name: e.target.value })}
-              className="w-full p-2 border rounded"
+              className="w-full p-2 border rounded text-black" // Adiciona text-black para o texto preto
             />
           </div>
           <div className="mb-4">
@@ -58,7 +58,7 @@ const UserData = ({ onBack }) => {
               type="email"
               value={userData.email}
               onChange={(e) => setUserData({ ...userData, email: e.target.value })}
-              className="w-full p-2 border rounded"
+              className="w-full p-2 border rounded text-black" // Adiciona text-black para o texto preto
             />
           </div>
           <button
