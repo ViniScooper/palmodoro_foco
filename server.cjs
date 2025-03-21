@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const axios = require('axios');
 
 const app = express();
 const PORT = 5000;
@@ -57,6 +58,64 @@ app.post('/login', (req, res) => {
 
     const token = jwt.sign({ id: user.id }, SECRET_KEY, { expiresIn: '1h' });
     res.status(200).send({ message: 'Login successful', token });
+  });
+});
+
+// Atualizar atividade como concluída
+app.put('/activities/:id', (req, res) => {
+  const { id } = req.params;
+
+  const query = 'UPDATE activities SET completed = 1 WHERE id = ?';
+  db.query(query, [id], (err, result) => {
+    if (err) return res.status(500).send(err);
+    res.status(200).send({ message: 'Atividade concluída com sucesso' });
+  });
+});
+
+// Obter dados do usuário e atividades concluídas
+app.get('/user/:id', (req, res) => {
+  const { id } = req.params; // Obtém o ID do usuário da URL
+  console.log('User ID recebido:', id); // Log do ID recebido
+
+  const userQuery = 'SELECT id, name, email FROM users WHERE id = ?';
+  const activitiesQuery = 'SELECT * FROM activities WHERE user_id = ? AND completed = 1';
+
+  db.query(userQuery, [id], (err, userResult) => {
+    if (err) {
+      console.error('Erro ao buscar usuário:', err); // Log do erro
+      return res.status(500).send(err);
+    }
+    if (userResult.length === 0) {
+      console.log('Usuário não encontrado'); // Log se o usuário não for encontrado
+      return res.status(404).send({ message: 'Usuário não encontrado' });
+    }
+
+    db.query(activitiesQuery, [id], (err, activitiesResult) => {
+      if (err) {
+        console.error('Erro ao buscar atividades:', err); // Log do erro
+        return res.status(500).send(err);
+      }
+
+      console.log('Usuário encontrado:', userResult[0]); // Log do usuário encontrado
+      console.log('Atividades concluídas:', activitiesResult); // Log das atividades concluídas
+
+      res.status(200).send({
+        user: userResult[0],
+        completedActivities: activitiesResult,
+      });
+    });
+  });
+});
+
+// Atualizar dados do usuário
+app.put('/user/:id', (req, res) => {
+  const { id } = req.params;
+  const { name, email, password } = req.body;
+
+  const query = 'UPDATE users SET name = ?, email = ?, password = ? WHERE id = ?';
+  db.query(query, [name, email, password, id], (err, result) => {
+    if (err) return res.status(500).send(err);
+    res.status(200).send({ message: 'Dados do usuário atualizados com sucesso' });
   });
 });
 

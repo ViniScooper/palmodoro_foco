@@ -1,5 +1,6 @@
 // filepath: c:\Users\vini\Music\Palmodoro_foco\src\components\Cronometro.jsx
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const Cronometro = () => {
   const [viewMode, setViewMode] = useState('clock'); // Alterna entre 'clock' e 'timer'
@@ -84,9 +85,28 @@ const Cronometro = () => {
     setActivities((prevActivities) => prevActivities.filter((activity) => activity.id !== id));
   };
 
+  const handleViewUserData = async () => {
+    try {
+      const userId = localStorage.getItem('userId'); // Assumindo que o ID do usuário está salvo no localStorage
+      const response = await axios.get(`http://192.168.1.10:5000/user/${userId}`);
+      console.log(response.data); // Exibe os dados do usuário e atividades concluídas no console
+      alert('Dados do usuário carregados. Veja o console para mais detalhes.');
+    } catch (error) {
+      alert('Erro ao carregar os dados do usuário');
+    }
+  };
+
   return (
     <div className="max-w-md mx-auto p-6 bg-white rounded-xl shadow-2xl min-h-screen flex flex-col text-black">
       <h1 className="text-3xl font-bold text-center mb-4">Palmodoro</h1>
+
+      {/* Botão para acessar dados do usuário */}
+      <button
+        onClick={handleViewUserData}
+        className="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+      >
+        Ver Dados do Usuário
+      </button>
 
       {/* Botões para alternar entre Relógio e Temporizador */}
       <div className="flex justify-center gap-4 mb-6">
