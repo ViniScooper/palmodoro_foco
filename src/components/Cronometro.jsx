@@ -88,7 +88,7 @@ const Cronometro = ({ onViewUserData }) => {
   const handleViewUserData = async () => {
     try {
       const userId = localStorage.getItem('userId'); // Assumindo que o ID do usuário está salvo no localStorage
-      const response = await axios.get(`http://192.168.1.10:5000/user/${userId}`);
+      const response = await axios.get(`http://localhost:5000/user/${userId}`);
       console.log(response.data); // Exibe os dados do usuário e atividades concluídas no console
       alert('Dados do usuário carregados. Veja o console para mais detalhes.');
     } catch (error) {

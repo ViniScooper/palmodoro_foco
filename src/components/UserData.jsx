@@ -10,7 +10,7 @@ const UserData = ({ onBack }) => {
       try {
         const userId = localStorage.getItem('userId');
         console.log('User ID:', userId); // Log do userId
-        const response = await axios.get(`http://192.168.1.10:5000/user/${userId}`);
+        const response = await axios.get(`http://localhost:5000/user/${userId}`);
         console.log('Response:', response.data); // Log da resposta do backend
         setUserData(response.data.user);
         setCompletedActivities(response.data.completedActivities);
@@ -25,7 +25,7 @@ const UserData = ({ onBack }) => {
 
   const handleUpdateUser = async () => {
     try {
-      await axios.put(`http://192.168.1.10:5000/user/${userData.id}`, userData);
+      await axios.put(`http://localhost:5000/user/${userData.id}`, userData);
       alert('Dados do usuário atualizados com sucesso!');
     } catch (error) {
       alert('Erro ao atualizar os dados do usuário');
