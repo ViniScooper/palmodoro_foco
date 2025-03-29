@@ -124,12 +124,12 @@ app.get('/user/:id', (req, res) => {
 // Atualizar dados do usuário
 app.put('/user/:id', (req, res) => {
   const { id } = req.params;
-  const { name, email, password } = req.body;
+  const { name, email } = req.body;
 
-  const query = 'UPDATE users SET name = ?, email = ?, password = ? WHERE id = ?';
-  db.query(query, [name, email, password, id], (err, result) => {
+  const query = 'UPDATE users SET name = ?, email = ? WHERE id = ?';
+  db.query(query, [name, email, id], (err, result) => {
     if (err) return res.status(500).send(err);
-    res.status(200).send({ message: 'Dados do usuário atualizados com sucesso' });
+    res.status(200).send({ message: 'Dados do usuário atualizados com sucess  o' });
   });
 });
 
