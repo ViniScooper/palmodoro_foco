@@ -17,8 +17,8 @@ app.use(bodyParser.json());
 // MySQL connection
 const db = mysql.createConnection({
   host: 'localhost',
-  user: 'vini',
-  password: '123',
+  user: 'root',
+  password: '123456',
   database: 'palmodoro',
   port: 3306, // Porta do MySQL (adicione apenas se não for a padrão)
 });
@@ -124,12 +124,13 @@ app.get('/user/:id', (req, res) => {
 // Atualizar dados do usuário
 app.put('/user/:id', (req, res) => {
   const { id } = req.params;
-  const { name, email, password } = req.body;
+  const { name, email } = req.body;
+  console.log(name, email)
 
-  const query = 'UPDATE users SET name = ?, email = ?, password = ? WHERE id = ?';
-  db.query(query, [name, email, password, id], (err, result) => {
+  const query = 'UPDATE users SET name = ?, email = ? WHERE id = ?';
+  db.query(query, [name, email, id], (err, result) => {
     if (err) return res.status(500).send(err);
-    res.status(200).send({ message: 'Dados do usuário atualizados com sucesso' });
+    res.status(200).send({ message: 'Dados do usuário atualizados com sucess  o' });
   });
 });
 
