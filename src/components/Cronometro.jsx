@@ -79,17 +79,41 @@ const Cronometro = ({ onViewUserData }) => {
       .padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
+
+
+
+
+
+
+
   const addNewActivity = () => {
     const title = prompt('Digite o nome da nova atividade:');
     if (title) {
-      const newActivity = {
-        id: Date.now(),
-        title,
-        completed: false,
-      };
-      setActivities([...activities, newActivity]);
+      const userId = localStorage.getItem('userId'); // Obtém o ID do usuário logado
+      
+      axios.post('http://localhost:5000/activities', {
+        userId: userId,
+        title: title
+      })
+      .then(response => {
+        // Adiciona a atividade no estado com o ID retornado pelo backend
+        const newActivity = {
+          id: response.data.activityId,
+          title,
+          completed: false,
+        };
+        setActivities([...activities, newActivity]);
+        alert('Atividade salva com sucesso!');
+      })
+      .catch(error => {
+        console.error('Erro ao salvar atividade:', error);
+        alert('Erro ao salvar a atividade');
+      });
     }
   };
+
+
+
 
   const toggleCompletion = (id) => {
     setActivities((prevActivities) =>
