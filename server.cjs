@@ -86,6 +86,24 @@ app.put('/activities/:id', (req, res) => {
   });
 });
 
+// Adicionar atividade
+app.post('/activities', (req, res) => {
+  const { userId, title } = req.body;
+
+  const query = `
+    INSERT INTO activities (user_id, title, completed, created_at)
+    VALUES (?, ?, false, NOW())
+  `;
+
+  db.query(query, [userId, title], (err, result) => {
+    if (err) {
+      console.error('Erro ao adicionar atividade:', err);
+      return res.status(500).send({ message: 'Erro ao adicionar atividade' });
+    }
+    res.status(201).send({ message: 'Atividade adicionada com sucesso!', activityId: result.insertId });
+  });
+});
+
 // Obter dados do usuário e atividades concluídas
 app.get('/user/:id', (req, res) => {
   const { id } = req.params; // Obtém o ID do usuário da URL
@@ -130,6 +148,45 @@ app.put('/user/:id', (req, res) => {
   db.query(query, [name, email, id], (err, result) => {
     if (err) return res.status(500).send(err);
     res.status(200).send({ message: 'Dados do usuário atualizados com sucess  o' });
+  });
+});
+
+// Salvar sessão
+app.post('/sessions', (req, res) => {
+  const { userId, activityId, durationSeconds, completedAt } = req.body;
+
+  const query = `
+    INSERT INTO sessions (user_id, activity_id, duration_seconds, completed_at)
+    VALUES (?, ?, ?, ?)
+  `;
+  db.query(query, [userId, activityId, durationSeconds, completedAt], (err, result) => {
+    if (err) {
+      console.error('Erro ao salvar a sessão:', err);
+      return res.status(500).send({ message: 'Erro ao salvar a sessão' });
+    }
+    res.status(201).send({ message: 'Sessão salva com sucesso!' });
+  });
+});
+
+app.get('/sessions/:userId', (req, res) => {
+  const { userId } = req.params;
+
+  const query = `
+    SELECT s.id, s.duration_seconds, s.completed_at, a.title AS activity_title
+    FROM sessions s
+    LEFT JOIN activities a ON s.activity_id = a.id
+    WHERE s.user_id = ?
+    ORDER BY s.completed_at DESC
+  `;
+  db.query(query, [userId], (err, results) => {
+    if (err) {
+      console.error('Erro ao buscar sessões:', err);
+      return res.status(500).send({ message: 'Erro ao buscar sessões' });
+    }
+    if (results.length === 0) {
+      return res.status(404).send({ message: 'Nenhuma sessão encontrada para este usuário.' });
+    }
+    res.status(200).send(results);
   });
 });
 

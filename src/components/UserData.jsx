@@ -4,6 +4,7 @@ import axios from 'axios';
 const UserData = ({ onBack }) => {
   const [userData, setUserData] = useState(null);
   const [completedActivities, setCompletedActivities] = useState([]);
+  const [sessions, setSessions] = useState([]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -21,6 +22,28 @@ const UserData = ({ onBack }) => {
     };
 
     fetchUserData();
+  }, []);
+
+  useEffect(() => {
+    const fetchSessions = async () => {
+      try {
+        const userId = localStorage.getItem('userId');
+        const token = localStorage.getItem('token'); // Obtenha o token do localStorage
+
+        const response = await axios.get(`http://localhost:5000/sessions/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        setSessions(response.data);
+      } catch (error) {
+        console.error('Erro ao carregar as sessões:', error);
+        alert('Erro ao carregar as sessões.');
+      }
+    };
+
+    fetchSessions();
   }, []);
 
   const handleUpdateUser = async () => {
@@ -69,14 +92,16 @@ const UserData = ({ onBack }) => {
           </button>
         </div>
       )}
-      <h2 className="text-2xl font-bold mt-6">Atividades Concluídas</h2>
-      <ul className="space-y-2 mt-4">
-        {completedActivities.map((activity) => (
-          <li key={activity.id} className="p-4 bg-green-200 rounded">
-            {activity.title}
-          </li>
-        ))}
-      </ul>
+      <h2 className="text-2xl font-bold mt-6">Sessões Registradas</h2>
+<ul className="space-y-2 mt-4">
+  {sessions.map((session) => (
+    <li key={session.id} className="p-4 bg-blue-200 rounded">
+      <p><strong>Atividade:</strong> {session.activity_title || 'Sem atividade'}</p>
+      <p><strong>Duração:</strong> {Math.floor(session.duration_seconds / 60)} minutos</p>
+      <p><strong>Concluído em:</strong> {new Date(session.completed_at).toLocaleString('pt-BR')}</p>
+    </li>
+  ))}
+</ul>
     </div>
   );
 };

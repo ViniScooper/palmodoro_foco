@@ -9,9 +9,7 @@ const Cronometro = ({ onViewUserData }) => {
   const [timeLeft, setTimeLeft] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [activities, setActivities] = useState([
-    { id: 1, title: 'Exercício matinal', completed: false },
-    { id: 2, title: 'Reunião de equipe', completed: false },
-    { id: 3, title: 'Estudar', completed: false },
+    
   ]);
 
   // Atualiza o relógio atual a cada segundo
@@ -30,6 +28,28 @@ const Cronometro = ({ onViewUserData }) => {
     } else if (timeLeft === 0 && isTimerRunning) {
       setIsTimerRunning(false);
       alert('Temporizador concluído!');
+
+      // Registrar a sessão no backend
+      const userId = localStorage.getItem('userId'); // Obtém o ID do usuário do localStorage
+      const activityId = activities.find((a) => !a.completed)?.id || null; // Obtém a atividade atual (opcional)
+      const durationSeconds =
+        timerInput.hours * 3600 + timerInput.minutes * 60 + timerInput.seconds;
+      const completedAt = new Date().toISOString(); // Data e hora atual
+
+      axios
+        .post('http://localhost:5000/sessions', {
+          userId,
+          activityId,
+          durationSeconds,
+          completedAt,
+        })
+        .then(() => {
+          alert('Sessão registrada com sucesso!');
+        })
+        .catch((error) => {
+          console.error('Erro ao registrar a sessão:', error);
+          alert('Erro ao registrar a sessão.');
+        });
     }
     return () => clearInterval(interval);
   }, [isTimerRunning, timeLeft]);
