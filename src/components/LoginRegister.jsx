@@ -17,23 +17,18 @@ const LoginRegister = ({ onLogin }) => {
 
     try {
       const response = await axios.post(url, formData);
-      console.log('Resposta do backend:', response.data); // Log da resposta do backend
+      console.log('Resposta do backend:', response.data);
       alert(response.data.message);
 
       if (isLogin) {
-        // Salva o userId no localStorage
         if (response.data.userId) {
-          localStorage.setItem('userId', response.data.userId); // Certifique-se de que o backend retorna userId
+          localStorage.setItem('userId', response.data.userId);
         } else {
           console.error('userId não retornado pelo backend');
         }
-
-        // Salva o token no localStorage (opcional)
         if (response.data.token) {
           localStorage.setItem('token', response.data.token);
         }
-
-        // Chama a função onLogin para redirecionar
         onLogin();
       }
     } catch (error) {
@@ -43,67 +38,66 @@ const LoginRegister = ({ onLogin }) => {
   };
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-white rounded shadow">
-      <h2 className="text-2xl font-bold mb-4">{isLogin ? 'Login' : 'Cadastro'}</h2>
-      <form onSubmit={handleSubmit}>
-        {!isLogin && (
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-500 to-indigo-600">
+      <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-8">
+        <h2 className="text-3xl font-bold text-center text-gray-800 mb-6">
+          {isLogin ? 'Entrar' : 'Cadastro'}
+        </h2>
+        <form onSubmit={handleSubmit}>
+          {!isLogin && (
+            <div className="mb-4">
+              <label className="block text-gray-700 mb-2">Nome</label>
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+          )}
           <div className="mb-4">
-            <label className="block text-gray-700">Nome</label>
+            <label className="block text-gray-700 mb-2">Email</label>
             <input
-              type="text"
-              name="name"
-              value={formData.name}
+              type="email"
+              name="email"
+              value={formData.email}
               onChange={handleChange}
-              className="w-full p-2 border rounded"
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />
           </div>
-        )}
-        <div className="mb-4">
-          <label className="block text-gray-700">Email</label>
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700">Senha</label>
-          <input
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            required
-          />
-        </div>
-        <button
-          type="submit"
-          className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
-        >
-          {isLogin ? 'Entrar' : 'Cadastrar'}
-        </button>
-      </form>
-      <p className="mt-4 text-center">
-        {isLogin ? 'Não possui uma conta?' : 'Já possui uma conta?'}{' '}
-        <button
-          onClick={() => setIsLogin(!isLogin)}
-          className="text-blue-500 underline"
-        >
-          {isLogin ? 'Cadastre-se' : 'Faça login'}
-        </button>
-      </p>
+          <div className="mb-6">
+            <label className="block text-gray-700 mb-2">Senha</label>
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+          <button
+            type="submit"
+            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 rounded-lg transition duration-200"
+          >
+            {isLogin ? 'Entrar' : 'Cadastrar'}
+          </button>
+        </form>
+        <p className="mt-6 text-center text-gray-600">
+          {isLogin ? 'Não possui uma conta?' : 'Já possui uma conta?'}{' '}
+          <button
+            onClick={() => setIsLogin(!isLogin)}
+            className="text-blue-500 font-medium hover:underline"
+          >
+            {isLogin ? 'Cadastre-se' : 'Faça login'}
+          </button>
+        </p>
+      </div>
     </div>
   );
 };
-
-
-
-
-
 
 export default LoginRegister;

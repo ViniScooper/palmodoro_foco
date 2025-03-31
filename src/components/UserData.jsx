@@ -33,43 +33,46 @@ const UserData = ({ onBack }) => {
   };
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-blue-500 rounded-xl shadow-2xl min-h-screen flex flex-col text-white">
-      <button
-        onClick={onBack}
-        className="mb-4 px-4 py-2 bg-gray-300 text-black rounded hover:bg-gray-400"
-      >
-        Voltar
-      </button>
-      <h1 className="text-3xl font-bold text-center mb-4">Dados do Usuário</h1>
-      {userData && (
-        <div>
-          <div className="mb-4">
-            <label className="block text-white">Nome</label>
-            <input
-              type="text"
-              value={userData.name}
-              onChange={(e) => setUserData({ ...userData, name: e.target.value })}
-              className="w-full p-2 border rounded text-black"
-            />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-400 to-indigo-500 p-6">
+      <div className="w-full max-w-md bg-white rounded-xl shadow-2xl p-8">
+        <button
+          onClick={onBack}
+          className="mb-6 px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition duration-200"
+        >
+          Voltar
+        </button>
+        <h1 className="text-3xl font-bold text-center text-gray-800 mb-6">
+          Dados do Usuário
+        </h1>
+        {userData && (
+          <div>
+            <div className="mb-4">
+              <label className="block text-gray-700 mb-2">Nome</label>
+              <input
+                type="text"
+                value={userData.name}
+                onChange={(e) => setUserData({ ...userData, name: e.target.value })}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+              />
+            </div>
+            <div className="mb-6">
+              <label className="block text-gray-700 mb-2">Email</label>
+              <input
+                type="email"
+                value={userData.email}
+                onChange={(e) => setUserData({ ...userData, email: e.target.value })}
+                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-800"
+              />
+            </div>
+            <button
+              onClick={handleUpdateUser}
+              className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 rounded-lg transition duration-200"
+            >
+              Atualizar Dados
+            </button>
           </div>
-          <div className="mb-4">
-            <label className="block text-white">Email</label>
-            <input
-              type="email"
-              value={userData.email}
-              onChange={(e) => setUserData({ ...userData, email: e.target.value })}
-              className="w-full p-2 border rounded text-black"
-            />
-          </div>
-          <button
-            onClick={handleUpdateUser}
-            className="w-full bg-green-500 text-white p-2 rounded hover:bg-green-600"
-          >
-            Atualizar Dados
-          </button>
-        </div>
-      )}
-      {/* A seção de "Sessões Registradas" foi removida conforme solicitado */}
+        )}
+      </div>
     </div>
   );
 };

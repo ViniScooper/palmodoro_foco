@@ -65,7 +65,6 @@ const Cronometro = ({ onViewUserData }) => {
   const startTimer = () => {
     const totalSeconds =
       timerInput.hours * 3600 + timerInput.minutes * 60 + timerInput.seconds;
-
     if (totalSeconds > 0) {
       setTimeLeft(totalSeconds);
       setIsTimerRunning(true);
@@ -121,7 +120,6 @@ const Cronometro = ({ onViewUserData }) => {
   };
 
   const toggleCompletion = (id) => {
-    // Atualiza no backend
     axios
       .put(
         `http://localhost:5000/activities/${id}`,
@@ -133,7 +131,6 @@ const Cronometro = ({ onViewUserData }) => {
         }
       )
       .then(() => {
-        // Atualiza localmente
         setActivities((prev) =>
           prev.map((activity) =>
             activity.id === id ? { ...activity, completed: !activity.completed } : activity
@@ -144,7 +141,6 @@ const Cronometro = ({ onViewUserData }) => {
   };
 
   const deleteActivity = (id) => {
-    // Deleta no backend
     axios
       .delete(`http://localhost:5000/activities/${id}`, {
         headers: {
@@ -152,7 +148,6 @@ const Cronometro = ({ onViewUserData }) => {
         },
       })
       .then(() => {
-        // Atualiza localmente
         setActivities((prev) => prev.filter((activity) => activity.id !== id));
       })
       .catch((error) => console.error('Erro ao excluir atividade:', error));
@@ -170,192 +165,180 @@ const Cronometro = ({ onViewUserData }) => {
   };
 
   const handleLogout = () => {
-    // Limpa os dados do cache (localStorage) e redireciona para a página de login ou recarrega a página
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
     localStorage.removeItem('sessions');
-    window.location.reload(); // ou redirecione para a rota de login, ex: window.location.href = '/login'
+    window.location.reload();
   };
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-white rounded-xl shadow-2xl min-h-screen flex flex-col text-black">
-      <div className="flex justify-between items-center mb-4">
-        <h1 className="text-3xl font-bold">Palmodoro</h1>
-        <button
-          onClick={handleLogout}
-          className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-        >
-          Sair
-        </button>
-      </div>
-
-      {/* Botão para acessar os dados do usuário */}
-      <button
-        onClick={onViewUserData}
-        className="mb-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-      >
-        Ver Dados do Usuário
-      </button>
-
-      {/* Botões para alternar entre Relógio e Temporizador */}
-      <div className="flex justify-center gap-4 mb-6">
-        <button
-          onClick={() => setViewMode('clock')}
-          className={`px-4 py-2 rounded ${
-            viewMode === 'clock' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-black'
-          }`}
-        >
-          Relógio
-        </button>
-        <button
-          onClick={() => setViewMode('timer')}
-          className={`px-4 py-2 rounded ${
-            viewMode === 'timer' ? 'bg-blue-500 text-white' : 'bg-gray-300 text-black'
-          }`}
-        >
-          Temporizador
-        </button>
-      </div>
-
-      {/* Exibição do Relógio */}
-      {viewMode === 'clock' && (
-        <div className="text-center">
-          <h2 className="text-4xl font-bold mb-2">
-            {currentTime.toLocaleTimeString('pt-BR', {
-              hour: '2-digit',
-              minute: '2-digit',
-              second: '2-digit',
-              hour12: true,
-            })}
-          </h2>
-          <div className="text-2xl text-gray-700">
-            {currentTime.toLocaleDateString('pt-BR', {
-              weekday: 'long',
-              year: 'numeric',
-              month: 'long',
-              day: 'numeric',
-            })}
-          </div>
+    <div className="min-h-screen bg-gradient-to-r from-blue-400 to-indigo-500 flex flex-col items-center p-6">
+      <div className="w-full max-w-2xl bg-white rounded-xl shadow-2xl p-6 mb-6">
+        <div className="flex justify-between items-center mb-4">
+          <h1 className="text-4xl font-bold text-gray-800">Palmodoro</h1>
+          <button
+            onClick={handleLogout}
+            className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+          >
+            Sair
+          </button>
         </div>
-      )}
+        <button
+          onClick={onViewUserData}
+          className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 rounded-lg transition duration-200 mb-6"
+        >
+          Ver Dados do Usuário
+        </button>
 
-      {/* Exibição do Temporizador */}
-      {viewMode === 'timer' && (
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Temporizador</h2>
-          <div className="text-5xl font-extrabold mb-4">{formatTime(timeLeft)}</div>
+        <div className="flex justify-center gap-4 mb-6">
+          <button
+            onClick={() => setViewMode('clock')}
+            className={`px-6 py-2 rounded-lg font-semibold transition duration-200 ${
+              viewMode === 'clock'
+                ? 'bg-blue-500 text-white'
+                : 'bg-gray-200 text-gray-800'
+            }`}
+          >
+            Relógio
+          </button>
+          <button
+            onClick={() => setViewMode('timer')}
+            className={`px-6 py-2 rounded-lg font-semibold transition duration-200 ${
+              viewMode === 'timer'
+                ? 'bg-blue-500 text-white'
+                : 'bg-gray-200 text-gray-800'
+            }`}
+          >
+            Temporizador
+          </button>
+        </div>
 
-          {!isTimerRunning && (
-            <div className="flex gap-2 justify-center mb-4">
-              <input
-                type="number"
-                min="0"
-                value={timerInput.hours}
-                onChange={(e) =>
-                  setTimerInput({
-                    ...timerInput,
-                    hours: parseInt(e.target.value) || 0,
-                  })
-                }
-                className="w-20 px-2 py-1 border rounded text-center"
-                placeholder="Horas"
-              />
-              <input
-                type="number"
-                min="0"
-                value={timerInput.minutes}
-                onChange={(e) =>
-                  setTimerInput({
-                    ...timerInput,
-                    minutes: parseInt(e.target.value) || 0,
-                  })
-                }
-                className="w-20 px-2 py-1 border rounded text-center"
-                placeholder="Minutos"
-              />
-              <input
-                type="number"
-                min="0"
-                value={timerInput.seconds}
-                onChange={(e) =>
-                  setTimerInput({
-                    ...timerInput,
-                    seconds: parseInt(e.target.value) || 0,
-                  })
-                }
-                className="w-20 px-2 py-1 border rounded text-center"
-                placeholder="Segundos"
-              />
-            </div>
-          )}
+        {viewMode === 'clock' && (
+          <div className="text-center">
+            <h2 className="text-5xl font-bold text-gray-800 mb-2">
+              {currentTime.toLocaleTimeString('pt-BR', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true,
+              })}
+            </h2>
+            <p className="text-xl text-gray-600">
+              {currentTime.toLocaleDateString('pt-BR', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+              })}
+            </p>
+          </div>
+        )}
 
-          <div className="flex gap-2 justify-center">
-            {!isTimerRunning ? (
-              <button
-                onClick={startTimer}
-                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-              >
-                Iniciar
-              </button>
-            ) : (
-              <button
-                onClick={() => setIsTimerRunning(false)}
-                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
-              >
-                Pausar
-              </button>
+        {viewMode === 'timer' && (
+          <div className="text-center">
+            <h2 className="text-3xl font-bold text-gray-800 mb-4">Temporizador</h2>
+            <div className="text-6xl font-extrabold text-blue-500 mb-4">{formatTime(timeLeft)}</div>
+            {!isTimerRunning && (
+              <div className="flex justify-center gap-3 mb-4">
+                <input
+                  type="number"
+                  min="0"
+                  value={timerInput.hours}
+                  onChange={(e) =>
+                    setTimerInput({ ...timerInput, hours: parseInt(e.target.value) || 0 })
+                  }
+                  className="w-20 px-3 py-2 border rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Horas"
+                />
+                <input
+                  type="number"
+                  min="0"
+                  value={timerInput.minutes}
+                  onChange={(e) =>
+                    setTimerInput({ ...timerInput, minutes: parseInt(e.target.value) || 0 })
+                  }
+                  className="w-20 px-3 py-2 border rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Minutos"
+                />
+                <input
+                  type="number"
+                  min="0"
+                  value={timerInput.seconds}
+                  onChange={(e) =>
+                    setTimerInput({ ...timerInput, seconds: parseInt(e.target.value) || 0 })
+                  }
+                  className="w-20 px-3 py-2 border rounded-lg text-center focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Segundos"
+                />
+              </div>
             )}
-            <button
-              onClick={resetTimer}
-              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-            >
-              Reiniciar
-            </button>
+            <div className="flex justify-center gap-4">
+              {!isTimerRunning ? (
+                <button
+                  onClick={startTimer}
+                  className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition duration-200"
+                >
+                  Iniciar
+                </button>
+              ) : (
+                <button
+                  onClick={() => setIsTimerRunning(false)}
+                  className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-200"
+                >
+                  Pausar
+                </button>
+              )}
+              <button
+                onClick={resetTimer}
+                className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-200"
+              >
+                Reiniciar
+              </button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Lista de Atividades */}
-      <div className="mt-6">
-        <h2 className="text-2xl font-bold mb-4">Atividades</h2>
-        <button
-          onClick={addNewActivity}
-          className="mb-4 px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
-        >
-          Adicionar Atividade
-        </button>
-        <ul className="space-y-2">
-          {activities.map((activity) => (
-            <li
-              key={activity.id}
-              className={`flex items-center justify-between p-4 rounded ${
-                activity.completed ? 'bg-green-200' : 'bg-gray-200'
-              }`}
-            >
-              <span
-                className={`flex-1 ${
-                  activity.completed ? 'line-through text-gray-500' : 'text-black'
+        <div className="mt-8">
+          <h2 className="text-3xl font-bold text-gray-800 mb-4">Atividades</h2>
+          <button
+            onClick={addNewActivity}
+            className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold py-2 rounded-lg transition duration-200 mb-4"
+          >
+            Adicionar Atividade
+          </button>
+          <ul className="space-y-3">
+            {activities.map((activity) => (
+              <li
+                key={activity.id}
+                className={`flex items-center justify-between p-4 rounded-lg transition duration-200 ${
+                  activity.completed ? 'bg-green-100' : 'bg-gray-100'
                 }`}
               >
-                {activity.title}
-              </span>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => toggleCompletion(activity.id)}
-                  className="px-2 py-1 bg-yellow-500 text-white rounded hover:bg-yellow-600"
+                <span
+                  className={`flex-1 ${
+                    activity.completed ? 'line-through text-gray-500' : 'text-gray-800'
+                  }`}
                 >
-                  {activity.completed ? 'Desfazer' : 'Concluir'}
-                </button>
-                <button
-                  onClick={() => deleteActivity(activity.id)}
-                  className="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                >
-                  Excluir
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
+                  {activity.title}
+                </span>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => toggleCompletion(activity.id)}
+                    className="px-3 py-1 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition duration-200"
+                  >
+                    {activity.completed ? 'Desfazer' : 'Concluir'}
+                  </button>
+                  <button
+                    onClick={() => deleteActivity(activity.id)}
+                    className="px-3 py-1 bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-200"
+                  >
+                    Excluir
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </div>
   );
