@@ -27,27 +27,19 @@ const Cronometro = ({ onViewUserData }) => {
       setIsTimerRunning(false);
       alert('Temporizador concluído!');
 
-      // Registrar a sessão no backend
-      const userId = localStorage.getItem('userId'); // Obtém o ID do usuário do localStorage
-      const activityId = activities.find((a) => !a.completed)?.id || null; // Obtém a atividade atual (opcional)
+      // Salva a sessão no cache do navegador (localStorage)
+      const userId = localStorage.getItem('userId');
+      const activityId = activities.find((a) => !a.completed)?.id || null;
       const durationSeconds =
         timerInput.hours * 3600 + timerInput.minutes * 60 + timerInput.seconds;
-      const completedAt = new Date().toISOString(); // Data e hora atual
+      const completedAt = new Date().toISOString();
 
-      axios
-        .post('http://localhost:5000/sessions', {
-          userId,
-          activityId,
-          durationSeconds,
-          completedAt,
-        })
-        .then(() => {
-          alert('Sessão registrada com sucesso!');
-        })
-        .catch((error) => {
-          console.error('Erro ao registrar a sessão:', error);
-          alert('Erro ao registrar a sessão.');
-        });
+      // Recupera as sessões já salvas (se houver) e adiciona a nova sessão
+      const sessions = JSON.parse(localStorage.getItem('sessions') || '[]');
+      sessions.push({ userId, activityId, durationSeconds, completedAt });
+      localStorage.setItem('sessions', JSON.stringify(sessions));
+
+      alert('Sessão registrada localmente!');
     }
     return () => clearInterval(interval);
   }, [isTimerRunning, timeLeft, timerInput, activities]);
@@ -168,18 +160,34 @@ const Cronometro = ({ onViewUserData }) => {
 
   const handleViewUserData = async () => {
     try {
-      const userId = localStorage.getItem('userId'); // Assumindo que o ID do usuário está salvo no localStorage
+      const userId = localStorage.getItem('userId');
       const response = await axios.get(`http://localhost:5000/user/${userId}`);
-      console.log(response.data); // Exibe os dados do usuário e atividades concluídas no console
+      console.log(response.data);
       alert('Dados do usuário carregados. Veja o console para mais detalhes.');
     } catch (error) {
       alert('Erro ao carregar os dados do usuário');
     }
   };
 
+  const handleLogout = () => {
+    // Limpa os dados do cache (localStorage) e redireciona para a página de login ou recarrega a página
+    localStorage.removeItem('token');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('sessions');
+    window.location.reload(); // ou redirecione para a rota de login, ex: window.location.href = '/login'
+  };
+
   return (
     <div className="max-w-md mx-auto p-6 bg-white rounded-xl shadow-2xl min-h-screen flex flex-col text-black">
-      <h1 className="text-3xl font-bold text-center mb-4">Palmodoro</h1>
+      <div className="flex justify-between items-center mb-4">
+        <h1 className="text-3xl font-bold">Palmodoro</h1>
+        <button
+          onClick={handleLogout}
+          className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+        >
+          Sair
+        </button>
+      </div>
 
       {/* Botão para acessar os dados do usuário */}
       <button
