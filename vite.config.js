@@ -6,8 +6,5 @@ export default defineConfig({
   css: {
     postcss: './postcss.config.cjs',
   },
-  server: {
-    host: true, // Permite acesso externo
-    port: 5173, // Mantém a porta padrão do Vite
-  },
+ 
 });
