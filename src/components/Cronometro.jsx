@@ -8,9 +8,7 @@ const Cronometro = ({ onViewUserData }) => {
   const [timerInput, setTimerInput] = useState({ hours: 0, minutes: 0, seconds: 0 });
   const [timeLeft, setTimeLeft] = useState(0);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
-  const [activities, setActivities] = useState([
-    
-  ]);
+  const [activities, setActivities] = useState([]);
 
   // Atualiza o relógio atual a cada segundo
   useEffect(() => {
@@ -52,7 +50,25 @@ const Cronometro = ({ onViewUserData }) => {
         });
     }
     return () => clearInterval(interval);
-  }, [isTimerRunning, timeLeft]);
+  }, [isTimerRunning, timeLeft, timerInput, activities]);
+
+  // Busca as atividades ao montar o componente
+  useEffect(() => {
+    const fetchActivities = async () => {
+      try {
+        const response = await axios.get('http://localhost:5000/activities', {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        });
+        setActivities(response.data);
+      } catch (error) {
+        console.error('Erro ao carregar atividades:', error);
+      }
+    };
+
+    fetchActivities();
+  }, []);
 
   const startTimer = () => {
     const totalSeconds =
@@ -79,54 +95,75 @@ const Cronometro = ({ onViewUserData }) => {
       .padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-
-
-
-
-
-
-
   const addNewActivity = () => {
     const title = prompt('Digite o nome da nova atividade:');
     if (title) {
-      const userId = localStorage.getItem('userId'); // Obtém o ID do usuário logado
-      
-      axios.post('http://localhost:5000/activities', {
-        userId: userId,
-        title: title
-      })
-      .then(response => {
-        // Adiciona a atividade no estado com o ID retornado pelo backend
-        const newActivity = {
-          id: response.data.activityId,
-          title,
-          completed: false,
-        };
-        setActivities([...activities, newActivity]);
-        alert('Atividade salva com sucesso!');
-      })
-      .catch(error => {
-        console.error('Erro ao salvar atividade:', error);
-        alert('Erro ao salvar a atividade');
-      });
+      axios
+        .post(
+          'http://localhost:5000/activities',
+          { 
+            userId: localStorage.getItem('userId'),
+            title 
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+          }
+        )
+        .then((response) => {
+          setActivities([
+            ...activities,
+            {
+              id: response.data.activityId,
+              title,
+              completed: false,
+            },
+          ]);
+        })
+        .catch((error) => {
+          console.error('Erro ao salvar atividade:', error);
+          alert('Erro ao salvar a atividade');
+        });
     }
   };
 
-
-
-
   const toggleCompletion = (id) => {
-    setActivities((prevActivities) =>
-      prevActivities.map((activity) =>
-        activity.id === id
-          ? { ...activity, completed: !activity.completed }
-          : activity
+    // Atualiza no backend
+    axios
+      .put(
+        `http://localhost:5000/activities/${id}`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('token')}`,
+          },
+        }
       )
-    );
+      .then(() => {
+        // Atualiza localmente
+        setActivities((prev) =>
+          prev.map((activity) =>
+            activity.id === id ? { ...activity, completed: !activity.completed } : activity
+          )
+        );
+      })
+      .catch((error) => console.error('Erro ao atualizar atividade:', error));
   };
 
   const deleteActivity = (id) => {
-    setActivities((prevActivities) => prevActivities.filter((activity) => activity.id !== id));
+    // Deleta no backend
+    axios
+      .delete(`http://localhost:5000/activities/${id}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`,
+        },
+      })
+      .then(() => {
+        // Atualiza localmente
+        setActivities((prev) => prev.filter((activity) => activity.id !== id));
+      })
+      .catch((error) => console.error('Erro ao excluir atividade:', error));
   };
 
   const handleViewUserData = async () => {
@@ -143,7 +180,6 @@ const Cronometro = ({ onViewUserData }) => {
   return (
     <div className="max-w-md mx-auto p-6 bg-white rounded-xl shadow-2xl min-h-screen flex flex-col text-black">
       <h1 className="text-3xl font-bold text-center mb-4">Palmodoro</h1>
-    
 
       {/* Botão para acessar os dados do usuário */}
       <button
@@ -176,7 +212,7 @@ const Cronometro = ({ onViewUserData }) => {
       {/* Exibição do Relógio */}
       {viewMode === 'clock' && (
         <div className="text-center">
-          <h2 className="text-4xl font-bold mb-2"> {/* Aumentado de text-2xl para text-4xl */}
+          <h2 className="text-4xl font-bold mb-2">
             {currentTime.toLocaleTimeString('pt-BR', {
               hour: '2-digit',
               minute: '2-digit',
@@ -184,7 +220,7 @@ const Cronometro = ({ onViewUserData }) => {
               hour12: true,
             })}
           </h2>
-          <div className="text-2xl text-gray-700"> {/* Aumentado de text-gray-700 para text-2xl */}
+          <div className="text-2xl text-gray-700">
             {currentTime.toLocaleDateString('pt-BR', {
               weekday: 'long',
               year: 'numeric',

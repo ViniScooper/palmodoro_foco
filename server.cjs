@@ -28,6 +28,19 @@ db.connect((err) => {
   console.log('Connected to MySQL');
 });
 
+// Middleware de autenticação
+function authenticateToken(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  // O token deve ser enviado no formato "Bearer <token>"
+  const token = authHeader && authHeader.split(' ')[1];
+  if (!token) return res.sendStatus(401);
+  jwt.verify(token, SECRET_KEY, (err, user) => {
+    if (err) return res.sendStatus(403);
+    req.user = user;
+    next();
+  });
+}
+
 // Register user
 app.post('/register', async (req, res) => {
   const { name, email, password } = req.body;
@@ -69,7 +82,7 @@ app.post('/login', (req, res) => {
     // Retorna o userId e o token
     res.json({
       message: 'Login realizado com sucesso',
-      userId: user.id, // Inclua o userId na resposta
+      userId: user.id,
       token,
     });
   });
@@ -78,7 +91,6 @@ app.post('/login', (req, res) => {
 // Atualizar atividade como concluída
 app.put('/activities/:id', (req, res) => {
   const { id } = req.params;
-
   const query = 'UPDATE activities SET completed = 1 WHERE id = ?';
   db.query(query, [id], (err, result) => {
     if (err) return res.status(500).send(err);
@@ -89,12 +101,10 @@ app.put('/activities/:id', (req, res) => {
 // Adicionar atividade
 app.post('/activities', (req, res) => {
   const { userId, title } = req.body;
-
   const query = `
     INSERT INTO activities (user_id, title, completed, created_at)
     VALUES (?, ?, false, NOW())
   `;
-
   db.query(query, [userId, title], (err, result) => {
     if (err) {
       console.error('Erro ao adicionar atividade:', err);
@@ -106,30 +116,27 @@ app.post('/activities', (req, res) => {
 
 // Obter dados do usuário e atividades concluídas
 app.get('/user/:id', (req, res) => {
-  const { id } = req.params; // Obtém o ID do usuário da URL
-  console.log('User ID recebido:', id); // Log do ID recebido
+  const { id } = req.params;
+  console.log('User ID recebido:', id);
 
   const userQuery = 'SELECT id, name, email FROM users WHERE id = ?';
   const activitiesQuery = 'SELECT * FROM activities WHERE user_id = ? AND completed = 1';
 
   db.query(userQuery, [id], (err, userResult) => {
     if (err) {
-      console.error('Erro ao buscar usuário:', err); // Log do erro
+      console.error('Erro ao buscar usuário:', err);
       return res.status(500).send(err);
     }
     if (userResult.length === 0) {
-      console.log('Usuário não encontrado'); // Log se o usuário não for encontrado
+      console.log('Usuário não encontrado');
       return res.status(404).send({ message: 'Usuário não encontrado' });
     }
 
     db.query(activitiesQuery, [id], (err, activitiesResult) => {
       if (err) {
-        console.error('Erro ao buscar atividades:', err); // Log do erro
+        console.error('Erro ao buscar atividades:', err);
         return res.status(500).send(err);
       }
-
-      console.log('Usuário encontrado:', userResult[0]); // Log do usuário encontrado
-      console.log('Atividades concluídas:', activitiesResult); // Log das atividades concluídas
 
       res.status(200).send({
         user: userResult[0],
@@ -143,18 +150,16 @@ app.get('/user/:id', (req, res) => {
 app.put('/user/:id', (req, res) => {
   const { id } = req.params;
   const { name, email } = req.body;
-
   const query = 'UPDATE users SET name = ?, email = ? WHERE id = ?';
   db.query(query, [name, email, id], (err, result) => {
     if (err) return res.status(500).send(err);
-    res.status(200).send({ message: 'Dados do usuário atualizados com sucess  o' });
+    res.status(200).send({ message: 'Dados do usuário atualizados com sucesso' });
   });
 });
 
 // Salvar sessão
 app.post('/sessions', (req, res) => {
   const { userId, activityId, durationSeconds, completedAt } = req.body;
-
   const query = `
     INSERT INTO sessions (user_id, activity_id, duration_seconds, completed_at)
     VALUES (?, ?, ?, ?)
@@ -168,9 +173,9 @@ app.post('/sessions', (req, res) => {
   });
 });
 
+// Obter sessões por usuário
 app.get('/sessions/:userId', (req, res) => {
   const { userId } = req.params;
-
   const query = `
     SELECT s.id, s.duration_seconds, s.completed_at, a.title AS activity_title
     FROM sessions s
@@ -190,6 +195,29 @@ app.get('/sessions/:userId', (req, res) => {
   });
 });
 
+// Endpoint para buscar atividades com autenticação
+app.get('/activities', authenticateToken, (req, res) => {
+  const userId = req.user.id;
+  db.query(
+    'SELECT * FROM activities WHERE user_id = ?',
+    [userId],
+    (err, results) => {
+      if (err) return res.status(500).json({ message: 'Erro ao buscar atividades' });
+      res.status(200).json(results);
+    }
+  );
+});
+
+// Endpoint para deletar atividade com autenticação
+app.delete('/activities/:id', authenticateToken, (req, res) => {
+  const { id } = req.params;
+  db.query('DELETE FROM activities WHERE id = ?', [id], (err) => {
+    if (err) return res.status(500).json({ message: 'Erro ao excluir atividade' });
+    res.status(200).json({ message: 'Atividade excluída com sucesso' });
+  });
+});
+
+// Inicia o servidor
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on http://0.0.0.0:${PORT}`);
 });
