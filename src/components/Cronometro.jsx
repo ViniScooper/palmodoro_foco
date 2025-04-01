@@ -172,7 +172,7 @@ const Cronometro = ({ onViewUserData }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-blue-400 to-indigo-500 flex flex-col items-center p-6">
+    <div className="min-h-screen bg-gradient-to-r from-blue to-indigo-500 flex flex-col items-center p-6">
       <div className="w-full max-w-2xl bg-white rounded-xl shadow-2xl p-6 mb-6">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-4xl font-bold text-gray-800">Palmodoro</h1>

@@ -14,7 +14,7 @@ function App() {
 
   // Renderiza a página principal ou a tela de dados do usuário
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-blue-700">
       {view === 'cronometro' ? (
         <Cronometro onViewUserData={() => setView('userData')} />
       ) : (
