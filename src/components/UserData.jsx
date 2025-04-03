@@ -11,7 +11,7 @@ const UserData = ({ onBack }) => {
         const userId = localStorage.getItem('userId');
         const token = localStorage.getItem('token');
         
-        const response = await axios.get(`http://192.168.15.16:5000/user/${userId}`, {
+        const response = await axios.get(`http://100.66.7.63:5000/user/${userId}`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -31,7 +31,7 @@ const UserData = ({ onBack }) => {
   const handleUpdateUser = async () => {
     try {
       const token = localStorage.getItem('token');
-      await axios.put(`http://192.168.15.16:5000/user/${userData.id}`, userData, {
+      await axios.put(`http://100.66.7.63:5000/user/${userData.id}`, userData, {
         headers: {
           Authorization: `Bearer ${token}`
         }

@@ -48,7 +48,7 @@ const Cronometro = ({ onViewUserData }) => {
   useEffect(() => {
     const fetchActivities = async () => {
       try {
-        const response = await axios.get('http://192.168.15.16:5000/activities', {
+        const response = await axios.get('http://100.66.7.63:5000/activities', {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`,
           },
@@ -91,7 +91,7 @@ const Cronometro = ({ onViewUserData }) => {
     if (title) {
       axios
         .post(
-          'http://192.168.15.16:5000/activities',
+          'http://100.66.7.63:5000/activities',
           { 
             userId: localStorage.getItem('userId'),
             title 
@@ -122,7 +122,7 @@ const Cronometro = ({ onViewUserData }) => {
   const toggleCompletion = (id) => {
     axios
       .put(
-        `http://192.168.15.16:5000/activities/${id}`,
+        `http://100.66.7.63:5000/activities/${id}`,
         {},
         {
           headers: {
@@ -142,7 +142,7 @@ const Cronometro = ({ onViewUserData }) => {
 
   const deleteActivity = (id) => {
     axios
-      .delete(`http://192.168.15.16:5000/activities/${id}`, {
+      .delete(`http://100.66.7.63:5000/activities/${id}`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`,
         },
@@ -156,11 +156,11 @@ const Cronometro = ({ onViewUserData }) => {
   const handleViewUserData = async () => {
     try {
       const userId = localStorage.getItem('userId');
-      const response = await axios.get(`http://192.168.15.16:5000/user/${userId}`);
+      const response = await axios.get(`http://100.66.7.63:5000/user/${userId}`);
       console.log(response.data);
       alert('Dados do usuário carregados. Veja o console para mais detalhes.');
     } catch (error) {
-      alert('Erro ao carregar os dados do usuário');
+      alert('Erro awo carregar os dados do usuário');
     }
   };
 
