@@ -80,6 +80,25 @@ const UserData = ({ onBack }) => {
             >
               Atualizar Dados
             </button>
+
+            {/* Exibição das atividades concluídas */}
+            <div className="mt-8">
+              <h2 className="text-2xl font-bold text-gray-800 mb-4">Atividades Concluídas</h2>
+              {completedActivities.length > 0 ? (
+                <ul className="space-y-3">
+                  {completedActivities.map((activity) => (
+                    <li
+                      key={activity.id}
+                      className="p-4 bg-green-100 rounded-lg text-gray-800"
+                    >
+                      {activity.title}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-600">Nenhuma atividade concluída.</p>
+              )}
+            </div>
           </div>
         )}
       </div>
