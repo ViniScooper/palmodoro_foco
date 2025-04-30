@@ -57,7 +57,10 @@ const UserData = ({ onBack }) => {
         {userData && (
           <div>
             <div className="mb-4">
-              <label className="block text-gray-700 mb-2">Nome</label>
+              <label className="block text-gray-700 mb-2">Nome
+
+                
+              </label>
               <input
                 type="text"
                 value={userData.name}
