@@ -43,11 +43,11 @@ const UserData = ({ onBack }) => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-400 to-indigo-500 p-6">
+    <div className="min-h-screen flex items-center justify-center p-6">
       <div className="w-full max-w-md bg-white rounded-xl shadow-2xl p-8">
         <button
           onClick={onBack}
-          className="mb-6 px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-gray-300 transition duration-200"
+          className="mb-6 px-4 py-2 bg-gray-200 text-gray-800 rounded hover:bg-green-300 transition duration-200"
         >
           Voltar
         </button>
