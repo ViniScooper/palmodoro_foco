@@ -14,10 +14,11 @@ app.use(bodyParser.json());
 
 // MySQL connection
 const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'vini',
-  password: '123',
-  database: 'palmodoro',
+
+  host: 'srv1783.hstgr.io',
+  user: 'u257714108_vini',
+  password: '@viniV3N1C03',
+  database: 'u257714108_palmodoro',
   port: 3306,
 });
 
